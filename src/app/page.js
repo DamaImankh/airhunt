@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // правильный импорт для App Router
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FaPlaneDeparture, FaPlaneArrival, FaCalendarAlt } from "react-icons/fa";
 
@@ -12,21 +12,22 @@ export default function Home() {
   const router = useRouter();
 
   const handleSearch = () => {
-    // Переход на страницу с параметрами
     router.push(`/results?from=${from}&to=${to}&date=${date}`);
   };
 
   return ( 
     <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-200 to-blue-500 p-4">
-<Link 
-  href="/login" 
-  className="absolute top-5 right-5 bg-white text-black font-semibold px-4 py-2 rounded-lg shadow hover:bg-gray-100 transition">
-  Войти
-</Link>
+      {/* Кнопка входа */}
+      <Link 
+        href="/login" 
+        className="absolute top-5 right-5 bg-white text-black font-semibold px-4 py-2 rounded-lg shadow hover:bg-gray-100 transition">
+        Войти
+      </Link>
+
       {/* Заголовок */}
       <h1 className="text-5xl font-extrabold text-white">AirHunt ✈️</h1>
 
-      {/* Блок с поисковой строкой */}
+      {/* Блок с поиском */}
       <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md mt-8">
         {/* Откуда */}
         <label className="block text-gray-700 text-lg font-semibold mb-2">
@@ -78,6 +79,13 @@ export default function Home() {
           className="mt-6 w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition">
           Найти билеты
         </button>
+
+        {/* Ссылка на популярные маршруты */}
+        <Link 
+          href="/routes" 
+          className="block text-center mt-4 bg-gray-200 text-black py-2 rounded-lg hover:bg-gray-400 transition">
+          Популярные маршруты
+        </Link>
       </div>
     </main>
   );

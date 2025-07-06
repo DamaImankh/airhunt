@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { auth, db } from "../../lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+import emailjs from "@emailjs/browser"
 
 export default function Checkout() {
     const searchParams = useSearchParams();
@@ -31,14 +32,15 @@ export default function Checkout() {
         e.preventDefault();
         setLoading(true);
         setMessage("");
-
+    
         try {
             if (!user) {
                 setMessage("Войдите в систему перед бронированием!");
                 setLoading(false);
                 return;
             }
-
+    
+            // Сначала добавляем бронирование в Firestore
             await addDoc(collection(db, "bookings"), {
                 userId: user.uid,
                 name,
@@ -48,14 +50,31 @@ export default function Checkout() {
                 date,
                 createdAt: new Date()
             });
-
-            setMessage("Бронирование успешно сохранено!");
+    
+            // Затем отправляем email через EmailJS
+            await emailjs.send(
+                process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,
+                process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,
+                {
+                    name,
+                    email,
+                    from,
+                    to,
+                    date
+                },
+                process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
+            );
+    
+            setMessage("Бронирование успешно сохранено и подтверждение отправлено на email!");
+            router.push("/success");
         } catch (error) {
             setMessage("Ошибка бронирования: " + error.message);
         }
-
+    
         setLoading(false);
     };
+    
+    
 
     return (
         <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-white to-gray-300 p-4">
@@ -73,7 +92,6 @@ export default function Checkout() {
                     onChange={(e) => setName(e.target.value)}
                     className="w-full mb-4 p-3 border rounded-lg outline-none text-black"
                     required
-                    disabled={!user}
                 />
                 <input 
                     type="email"
@@ -82,12 +100,11 @@ export default function Checkout() {
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full mb-4 p-3 border rounded-lg outline-none text-black"
                     required
-                    disabled={!user}
                 />
                 <button 
                     type="submit" 
                     className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition"
-                    disabled={!user || loading}
+                    disabled={loading}
                 >
                     {loading ? "Обработка..." : "Подтвердить бронирование"}
                 </button>

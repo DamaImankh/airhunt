@@ -98,20 +98,24 @@ export default function Login() {
             </form>
 
             {/* Back Button Logic */}
-            <button 
+
+            <button
                 onClick={() => {
-                    if (document.referrer && !document.referrer.includes(window.location.origin)) {
-                        window.location.href = "/";
-                    } else if (window.history.length > 1) {
-                        router.back();
+                    if (
+                    document.referrer &&                        // есть реферер
+                    document.referrer.includes(window.location.hostname) // и он с твоего сайта
+                    ) {
+                    window.history.back(); // вернуться назад
                     } else {
-                        router.push("/");
+                    router.push("/"); // иначе на главную
                     }
-                }} 
+                }}
                 className="mt-4 text-gray-700 hover:text-blue-600 underline"
-            >
+                >
                 ⬅ Вернуться назад
             </button>
+
+
         </main>
     );
 }

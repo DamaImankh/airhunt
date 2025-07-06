@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { auth, db } from "../../lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 
 export default function Profile() {
     const [user, setUser] = useState(null);
@@ -39,6 +39,18 @@ export default function Profile() {
         }
     };
 
+    const handleDelete = async (bookingId) => {
+        const confirmDelete = window.confirm("Вы действительно хотите удалить это бронирование?");
+        if (!confirmDelete) return;
+
+        try {
+            await deleteDoc(doc(db, "bookings", bookingId));
+            setBookings((prev) => prev.filter((b) => b.id !== bookingId));
+        } catch (error) {
+            console.error("Ошибка удаления бронирования:", error);
+        }
+    };
+
     if (loading) return <div className="text-center text-white mt-20 text-xl">Загрузка...</div>;
 
     return (
@@ -53,10 +65,16 @@ export default function Profile() {
                 ) : (
                     <ul className="mt-4">
                         {bookings.map((booking) => (
-                            <li key={booking.id} className="border p-4 rounded-lg mb-2 bg-gray-100">
+                            <li key={booking.id} className="border p-4 rounded-lg mb-2 bg-gray-100 flex flex-col">
                                 <p className="text-black"><strong>Откуда:</strong> {booking.from}</p>
                                 <p className="text-black"><strong>Куда:</strong> {booking.to}</p>
-                                <p className="text-black"><strong>Дата:</strong> {booking.date}</p>
+                                <p className="text-black mb-2"><strong>Дата:</strong> {booking.date}</p>
+                                <button
+                                    onClick={() => handleDelete(booking.id)}
+                                    className="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 transition"
+                                >
+                                    Удалить
+                                </button>
                             </li>
                         ))}
                     </ul>

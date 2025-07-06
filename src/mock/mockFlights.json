@@ -1,0 +1,40 @@
+// src/mock/mockFlights.js
+
+const airlines = ["AirHunt Airlines", "SkyWays", "FlyKaz", "EuroJet", "NomadAir"];
+const airports = ["ALA", "IST", "FRA", "LON", "DXB", "CAI", "AMS", "CDG", "JFK"];
+const flights = [];
+
+for (let i = 0; i < 150; i++) {
+  const from = airports[Math.floor(Math.random() * airports.length)];
+  let to;
+  do {
+    to = airports[Math.floor(Math.random() * airports.length)];
+  } while (to === from);
+
+  const airline = airlines[Math.floor(Math.random() * airlines.length)];
+  const flightNumber = airline.slice(0, 2).toUpperCase() + Math.floor(100 + Math.random() * 900);
+
+  // дата в диапазоне с сегодня до +365 дней
+  const today = new Date();
+  const randomDays = Math.floor(Math.random() * 365);
+  const dateObj = new Date(today.getTime() + randomDays * 24 * 60 * 60 * 1000);
+  const date = dateObj.toISOString().split('T')[0];
+
+  const departureTime = `${Math.floor(Math.random() * 23).toString().padStart(2, '0')}:${(Math.floor(Math.random() * 60)).toString().padStart(2, '0')}`;
+  const arrivalTime = `${Math.floor(Math.random() * 23).toString().padStart(2, '0')}:${(Math.floor(Math.random() * 60)).toString().padStart(2, '0')}`;
+  const price = (100 + Math.random() * 500).toFixed(0);
+
+  flights.push({
+    id: i + 1,
+    airline,
+    flightNumber,
+    from,
+    to,
+    date,
+    departureTime,
+    arrivalTime,
+    price,
+  });
+}
+
+export default flights;
