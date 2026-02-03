@@ -1,4 +1,4 @@
-// src/mock/mockFlights.js
+// src/mock/mockFlights.json
 
 const airlines = ["AirHunt Airlines", "SkyWays", "FlyKaz", "EuroJet", "NomadAir"];
 const airports = ["ALA", "IST", "FRA", "LON", "DXB", "CAI", "AMS", "CDG", "JFK"];

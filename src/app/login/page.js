@@ -1,121 +1,65 @@
 "use client";
-import { useState, useEffect } from "react";
-import { auth } from "../../lib/firebase";
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../lib/firebase";
+import Link from "next/link";
 
 export default function Login() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    
-    const redirectTo = searchParams.get("redirectTo");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo"); // куда перенаправить после входа
 
-    // Store redirect path only if it's set
-    useEffect(() => {
-        if (redirectTo) {
-            localStorage.setItem("redirectTo", redirectTo);
-        }
-    }, [redirectTo]);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError("");
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      setMessage("Успешный вход!");
+      router.push(redirectTo || "/profile");
+    } catch (error) {
+      setMessage("Ошибка входа: " + error.message);
+    }
+  };
 
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-            
-            // Get saved redirect route or default to profile
-            const destination = localStorage.getItem("redirectTo") || "/profile";
-            localStorage.removeItem("redirectTo"); // Clean up storage
-            router.push(destination);
-        } catch (error) {
-            setError("Ошибка входа: " + error.message);
-        }
+  return (
+    <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-white to-gray-300 p-4">
+      <h1 className="text-3xl font-bold text-black mb-4">Вход в аккаунт</h1>
 
-        setLoading(false);
-    };
+      <form onSubmit={handleLogin} className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md">
+        <input 
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full mb-4 p-3 border rounded-lg outline-none text-black"
+          required
+        />
+        <input 
+          type="password"
+          placeholder="Пароль"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full mb-4 p-3 border rounded-lg outline-none text-black"
+          required
+        />
+        <button 
+          type="submit"
+          className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition"
+        >
+          Войти
+        </button>
+        {message && <p className="mt-4 text-center text-black">{message}</p>}
 
-    const handleGoogleLogin = async () => {
-        const provider = new GoogleAuthProvider();
-        try {
-            await signInWithPopup(auth, provider);
-            const destination = localStorage.getItem("redirectTo") || "/profile";
-            localStorage.removeItem("redirectTo");
-            router.push(destination);
-        } catch (error) {
-            setError("Ошибка входа через Google: " + error.message);
-        }
-    };
-
-    return (
-        <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-white to-gray-300 p-4">
-            <h1 className="text-4xl font-bold text-black mb-6">Вход в систему</h1>
-
-            <form onSubmit={handleLogin} className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md">
-                {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full mb-4 p-3 border rounded-lg outline-none text-black"
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Пароль"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full mb-4 p-3 border rounded-lg outline-none text-black"
-                    required
-                />
-
-                <button 
-                    type="submit" 
-                    className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition mb-3"
-                    disabled={loading}
-                >
-                    {loading ? "Вход..." : "Войти"}
-                </button>
-
-                <button 
-                    type="button"
-                    onClick={handleGoogleLogin}
-                    className="w-full bg-red-500 text-white font-semibold py-3 rounded-lg hover:bg-red-600 transition mb-4"
-                >
-                    Войти через Google
-                </button>
-
-                <p className="text-center text-gray-600">
-                    Нет аккаунта? <a href="/register" className="text-blue-500 hover:underline">Зарегистрироваться</a>
-                </p>
-            </form>
-
-            {/* Back Button Logic */}
-
-            <button
-                onClick={() => {
-                    if (
-                    document.referrer &&                        // есть реферер
-                    document.referrer.includes(window.location.hostname) // и он с твоего сайта
-                    ) {
-                    window.history.back(); // вернуться назад
-                    } else {
-                    router.push("/"); // иначе на главную
-                    }
-                }}
-                className="mt-4 text-gray-700 hover:text-blue-600 underline"
-                >
-                ⬅ Вернуться назад
-            </button>
-
-
-        </main>
-    );
+        <p className="mt-4 text-center text-black">
+          Нет аккаунта?{" "}
+          <Link href="/register" className="text-blue-600 hover:underline">Зарегистрироваться</Link>
+        </p>
+      </form>
+    </main>
+  );
 }

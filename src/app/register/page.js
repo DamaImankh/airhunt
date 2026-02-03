@@ -9,45 +9,54 @@ export default function Register() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
-  const handleRegister = async () => {
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setMessage("");
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      router.push("/login");
-    } catch (err) {
-      setError("Ошибка регистрации: " + err.message);
+      setMessage("Регистрация успешна!");
+      router.push("/profile");
+    } catch (error) {
+      setMessage("Ошибка регистрации: " + error.message);
     }
   };
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-200 to-blue-500 p-4">
-      <h1 className="text-4xl font-bold text-white mb-6">Регистрация</h1>
-      <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md">
-        {error && <p className="text-red-500">{error}</p>}
+    <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-white to-gray-300 p-4">
+      <h1 className="text-3xl font-bold text-black mb-4">Регистрация</h1>
+
+      <form onSubmit={handleRegister} className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md">
         <input 
-          type="email" 
-          placeholder="Email" 
-          value={email} 
-          onChange={(e) => setEmail(e.target.value)} 
-          className="w-full text-black p-3 border rounded-lg mb-4"
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full mb-4 p-3 border rounded-lg outline-none text-black"
+          required
         />
         <input 
-          type="password" 
-          placeholder="Пароль" 
-          value={password} 
-          onChange={(e) => setPassword(e.target.value)} 
-          className="w-full text-black p-3 border rounded-lg mb-4"
+          type="password"
+          placeholder="Пароль"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full mb-4 p-3 border rounded-lg outline-none text-black"
+          required
         />
         <button 
-          onClick={handleRegister} 
-          className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition">
+          type="submit"
+          className="w-full bg-green-600 text-white font-semibold py-3 rounded-lg hover:bg-green-700 transition"
+        >
           Зарегистрироваться
         </button>
-        <p className="text-center text-black mt-4">
-          Уже есть аккаунт? <Link href="/login" className="text-blue-600">Войти</Link>
+        {message && <p className="mt-4 text-center text-black">{message}</p>}
+
+        <p className="mt-4 text-center text-black">
+          Уже есть аккаунт?{" "}
+          <Link href="/login" className="text-blue-600 hover:underline">Войти</Link>
         </p>
-      </div>
+      </form>
     </main>
   );
 }
